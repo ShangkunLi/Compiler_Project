@@ -112,6 +112,7 @@ extern int  yywrap();
 %left LT LE GT GE EQ NE
 %left ADD SUB
 %left MUL DIV
+%left UMINUS
 %right NOT
 %right LBRACKET
 %left RBRACKET
@@ -245,7 +246,7 @@ Type: INT
 }
 | TOKENID
 {
-  A_StructType($1->pos, $1->id);
+  $$ = A_StructType($1->pos, $1->id);
 }
 ;
 // Variable Declarations END
@@ -375,7 +376,7 @@ ExprUnit: NUM
 {
   $$ = A_MemberExprUnit($1->pos, A_MemberExpr($1->pos, $1, $3->id));
 }
-| SUB ExprUnit
+| SUB ExprUnit %prec UMINUS
 {
   $$ = A_ArithUExprUnit($2->pos, A_ArithUExpr($2->pos, A_neg, $2));
 }
@@ -544,6 +545,10 @@ WhileStmt: WHILE LPAREN BoolExpr RPAREN LBRACE CodeBlockStmtList RBRACE
 ReturnStmt: RET RightVal SEMICOLON
 {
   $$ = A_ReturnStmt($1, $2);
+}
+| RET SEMICOLON
+{
+  $$ = A_ReturnStmt($1, NULL);
 }
 ;
 // Basic Statements END
